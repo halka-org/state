@@ -1,0 +1,6 @@
+*.lock
+node_modules
+dist
+.gitignore
+.prettierignore
+LICENSE

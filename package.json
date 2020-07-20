@@ -1,0 +1,52 @@
+{
+  "name": "state",
+  "version": "0.1.0",
+  "description": "A lightweight global state solution for react with zero external dependencies and clean hooks API",
+  "source": "src/index.ts",
+  "main": "dist/halka-state.js",
+  "module": "dist/halka-state.mjs",
+  "unpkg": "dist/halka-state.umd.js",
+  "types": "dist/halka-state.d.ts",
+  "amdName": "HalkaState",
+  "sideEffects": false,
+  "scripts": {
+    "example": "parcel example/index.html --out-dir example/dist",
+    "build": "rm -rf dist && microbundle --external react --globals react=React --strict"
+  },
+  "repository": "https://github.com/halka-org/state.git",
+  "author": "Soumyajit Pathak <s.pathak5995@gmail.com>",
+  "contributors": [
+    "Sharad Chand <pepsighan@sharadchand.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "keywords": [
+    "react",
+    "state",
+    "hooks"
+  ],
+  "devDependencies": {
+    "@types/react": "^16.9.43",
+    "@types/react-dom": "^16.9.8",
+    "husky": "^4.2.5",
+    "lint-staged": "^10.2.11",
+    "microbundle": "^0.12.3",
+    "parcel": "^1.12.4",
+    "prettier": "^2.0.5",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*": [
+      "prettier --write .",
+      "git add"
+    ]
+  }
+}
