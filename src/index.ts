@@ -61,8 +61,17 @@ interface Listener<State> {
   equalityCheck: EqualityCheck<State>;
 }
 type Listeners<State> = Record<UniqueSymbol, Listener<State>>;
+type StateUpdaterCallback<State> = (prevState: State) => State;
+type StateUpdater<State> = (arg: StateUpdaterCallback<State> | State) => void;
+type UseState<State> = (
+  selector?: Selector<State>,
+  equalityCheck?: EqualityCheck<State>
+) => [Partial<State>, StateUpdater<State>];
+type GetState<State> = () => State;
 
-export function createStore<State>(initialState: State) {
+export function createStore<State extends Record<string, unknown>>(
+  initialState: State
+): [UseState<State>, StateUpdater<State>, GetState<State>] {
   const listenerKeys = new Set<UniqueSymbol>();
   let listeners: Listeners<State> = {} as Listeners<State>;
 
@@ -73,12 +82,12 @@ export function createStore<State>(initialState: State) {
     },
   };
 
-  function updater(arg: State): void;
-  function updater(arg: (prevState: State) => State): void;
-  function updater(arg: any): void {
-    let newState = arg as State;
+  function updater(arg: StateUpdaterCallback<State> | State): void {
+    let newState: State;
     if (typeof arg === 'function') {
-      newState = arg(store.state) as State;
+      newState = arg(store.state);
+    } else {
+      newState = arg;
     }
 
     store.state = newState;
