@@ -17,20 +17,12 @@ npm install @halka/state
 ```js
 import { createStore } from '@halka/state';
 
-const counter = createStore(0);
+const [useCounter, updateCounter] = createStore(0);
 ```
 
 The library exports only one function i.e. `createStore`. You can use it to create a new store.
 
-`createStore` accepts only one argument that is the initial state of the store. It can be anything a primitive value like number, string, boolean or an array or object.
-
-### Using the store created
-
-```js
-const [useCounter, updateCounter] = counter;
-```
-
-The `counter` store we created earlier is a tuple.
+`createStore` accepts only one argument that is the initial state of the store. It can be anything a primitive value like number, string, boolean or an array or object. It returns a tuple.
 
 The first element `useCounter` is a React hook that can be used inside any React functional component to select a slice of the current state from the store.
 
@@ -140,7 +132,7 @@ const markTodoComplete = (todoIndex) => {
 };
 ```
 
-Not to worry, you can use the amazing [Immer](https://immerjs.github.io/immer) library to help with it. It let's you use APIs that mutate data while keeping the resultant data still immutable.
+Not to worry, you can use the amazing [Immer](https://immerjs.github.io/immer) library to help with it. It lets you use APIs that mutate data while keeping the resultant data still immutable.
 
 Let's look at how we can use immer to make the update above simpler.
 
