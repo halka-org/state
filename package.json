@@ -1,5 +1,5 @@
 {
-  "name": "state",
+  "name": "@halka/state",
   "version": "0.1.0",
   "description": "A lightweight global state solution for react with zero external dependencies and clean hooks API",
   "source": "src/index.ts",

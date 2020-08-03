@@ -37,10 +37,10 @@ function useUpdateOnlyEffect(
 }
 
 function useForceUpdate() {
-  const triggerUpdate = useState(false)[1];
+  const triggerUpdate = useState({})[1];
 
   return useCallback(() => {
-    triggerUpdate((val) => !val);
+    triggerUpdate({});
   }, []);
 }
 
