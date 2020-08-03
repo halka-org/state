@@ -1,6 +1,6 @@
 # @halka/state
 
-![Bundle Size](https://badgen.net/bundlephobia/minzip/@halka/state) ![npm version](https://badgen.net/npm/v/@halka/state) ![types](https://badgen.net/npm/types/@halka/state) ![license](https://badgen.net/npm/license/@halka/state)
+![Bundle Size](https://badgen.net/bundlephobia/minzip/@halka/state) ![npm version](https://badgen.net/npm/v/@halka/state) ![types](https://badgen.net/npm/types/@halka/state) ![license](https://badgen.net/github/license/halka-org/state)
 
 `@halka/state` is a lightweight global state solution for react with zero external dependencies and clean hooks API.
 
