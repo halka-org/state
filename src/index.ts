@@ -1,18 +1,11 @@
-import {
-  useRef,
-  useState,
-  useEffect,
-  useCallback,
-  EffectCallback,
-  DependencyList,
-} from 'react';
+import React, { EffectCallback, DependencyList } from 'react';
 
 function useMountEffect(effect: EffectCallback) {
-  useEffect(effect, []);
+  React.useEffect(effect, []);
 }
 
 function useIsJustMountedState(): boolean {
-  const isJustMounted = useRef(true);
+  const isJustMounted = React.useRef(true);
 
   if (isJustMounted.current) {
     isJustMounted.current = false;
@@ -29,7 +22,7 @@ function useUpdateOnlyEffect(
 ) {
   const isJustMounted = useIsJustMountedState();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isJustMounted) {
       return effect();
     }
@@ -37,9 +30,9 @@ function useUpdateOnlyEffect(
 }
 
 function useForceUpdate() {
-  const triggerUpdate = useState({})[1];
+  const triggerUpdate = React.useState({})[1];
 
-  return useCallback(() => {
+  return React.useCallback(() => {
     triggerUpdate({});
   }, []);
 }
@@ -113,7 +106,7 @@ export function createStore<State extends Record<string, unknown>>(
   ): [Partial<State>, typeof updater] => {
     const state = store.getState();
 
-    const listenerKeyRef = useRef(Symbol('listener'));
+    const listenerKeyRef = React.useRef(Symbol('listener'));
 
     const triggerUpdate = useForceUpdate();
 

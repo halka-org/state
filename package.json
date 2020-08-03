@@ -1,17 +1,17 @@
 {
   "name": "@halka/state",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A lightweight global state solution for react with zero external dependencies and clean hooks API",
   "source": "src/index.ts",
   "main": "dist/halka-state.js",
   "module": "dist/halka-state.mjs",
   "unpkg": "dist/halka-state.umd.js",
-  "types": "dist/halka-state.d.ts",
+  "types": "dist/index.d.ts",
   "amdName": "HalkaState",
   "sideEffects": false,
   "scripts": {
     "example": "parcel example/index.html --out-dir example/dist",
-    "build": "rm -rf dist && microbundle --external react --globals react=React --strict"
+    "build": "rm -rf dist && microbundle --external react --globals react=React --strict --no-compress"
   },
   "repository": {
     "type": "git",
@@ -39,6 +39,9 @@
     "react-dom": "^16.13.1",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.7"
+  },
+  "peerDependencies": {
+    "react": ">=16.8"
   },
   "husky": {
     "hooks": {
