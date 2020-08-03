@@ -2,7 +2,7 @@
 
 ![Bundle Size](https://badgen.net/bundlephobia/minzip/@halka/state) ![npm version](https://badgen.net/npm/v/@halka/state) ![types](https://badgen.net/npm/types/@halka/state) ![license](https://badgen.net/npm/license/@halka/state)
 
-`@halka/state` is a lightweight global state solution for react with zero external dependencies and clean hooks API
+`@halka/state` is a lightweight global state solution for react with zero external dependencies and clean hooks API.
 
 ## Installation
 
@@ -20,9 +20,9 @@ import { createStore } from '@halka/state';
 const counter = createStore(0);
 ```
 
-The library exports only one function i.e. `createStore`. You can use it to create a brand new store.
+The library exports only one function i.e. `createStore`. You can use it to create a new store.
 
-`createStore` accepts only one parameter that is the initial state of the store. It can be anything a primitive value like number, string, boolean or an array or object.
+`createStore` accepts only one argument that is the initial state of the store. It can be anything a primitive value like number, string, boolean or an array or object.
 
 ### Using the store created
 
@@ -82,7 +82,7 @@ function AbsoluteSquaredCounter() {
 }
 ```
 
-Here, we are passing a custom equality to check if unsigned value is the same as before. If yes, then we don't update it.
+Here, we are passing a custom equality check function to check if the absolute value is the same as before. If yes, then we don't update it.
 
 > (PS: It's redundant here because square of any number is always positive. The example is just for demonstration purposes)
 
@@ -115,11 +115,11 @@ function Counter() {
 
 State updater function is the second element of both the return value of `createStore` as well as `useCounter` (i.e. the hook returned from `createStore`).
 
-You can pass the next state value directly to the `updateState` method like we did in our `reset` handler.
+You can pass the next state value directly to the state updater method like we did in our `reset` handler.
 
-If your next state depends on the previous state than you can also pass a callback function to the `updateState` which gets passed the previous state and must return the next state. Like we used in our `increment` and `decrement` handler.
+If your next state depends on the previous state than you can also pass a callback function to the state updater which gets passed the previous state and must return the next state. Like we used in our `increment` and `decrement` handler.
 
-This API is similar to the `updateState` method returned by `useState`.
+This API is similar to the state updater method returned by `useState`.
 
 ### Updating nested state with Immer
 
@@ -140,7 +140,7 @@ const markTodoComplete = (todoIndex) => {
 };
 ```
 
-Not to worry, you can use the all mightly [Immer](https://immerjs.github.io/immer) to help with it. It let's you use APIs that mutate data while keeping the data still immutable.
+Not to worry, you can use the amazing [Immer](https://immerjs.github.io/immer) library to help with it. It let's you use APIs that mutate data while keeping the resultant data still immutable.
 
 Let's look at how we can use immer to make the update above simpler.
 
@@ -156,9 +156,11 @@ const toggleTodo = (todoIndex) => {
 };
 ```
 
-We are using a [curried producer API from Immer](https://immerjs.github.io/immer/docs/curried-produce).
+We are using the [curried producer API from Immer](https://immerjs.github.io/immer/docs/curried-produce).
 
 ## Inspirations and Prior work we referred
 
 - [Zustand](https://github.com/react-spring/zustand)
 - [Unstated-Next](https://github.com/jamiebuilds/unstated-next)
+
+This library won't be possible without these and many more libraries existing in the open source communities. Big thanks to the whole community.
