@@ -13,13 +13,15 @@
     "example": "parcel example/index.html --out-dir example/dist",
     "build": "rm -rf dist && microbundle --external react --globals react=React --strict"
   },
-  "repository": "https://github.com/halka-org/state.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halka-org/state.git"
+  },
   "author": "Soumyajit Pathak <s.pathak5995@gmail.com>",
   "contributors": [
     "Sharad Chand <pepsighan@sharadchand.com>"
   ],
   "license": "MIT",
-  "private": true,
   "keywords": [
     "react",
     "state",
