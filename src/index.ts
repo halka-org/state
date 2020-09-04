@@ -59,10 +59,15 @@ type StateUpdater<State> = (arg: StateUpdaterCallback<State> | State) => void;
 type UseState<State> = (
   selector?: Selector<State>,
   equalityCheck?: EqualityCheck<State>
-) => [Partial<State>, StateUpdater<State>];
+) => Partial<State>;
 type GetState<State> = () => State;
 
-export function createStore<State extends Record<string, unknown>>(
+type StateTypes =
+  | Record<string | number | symbol, unknown>
+  | string
+  | number
+  | boolean;
+export function createStore<State extends StateTypes | Array<StateTypes>>(
   initialState: State
 ): [UseState<State>, StateUpdater<State>, GetState<State>] {
   const listenerKeys = new Set<UniqueSymbol>();
@@ -103,7 +108,7 @@ export function createStore<State extends Record<string, unknown>>(
   const useStore = (
     selector: Selector<State> = defaultSelector,
     equalityCheck: EqualityCheck<State> = defaultEqualityCheck
-  ): [Partial<State>, typeof updater] => {
+  ): Partial<State> => {
     const state = store.getState();
 
     const listenerKeyRef = React.useRef(Symbol('listener'));
@@ -141,7 +146,7 @@ export function createStore<State extends Record<string, unknown>>(
       listeners[listenerKey].prevSlice = selector(state);
     });
 
-    return [selector(state), updater];
+    return selector(state);
   };
 
   return [useStore, updater, store.getState];

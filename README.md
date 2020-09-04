@@ -32,17 +32,15 @@ The second element `updateCounter` is an updater function similar to the one we 
 
 ```js
 function Counter() {
-  const [count] = useCounter();
+  const count = useCounter();
 
   return <span>{count}</span>;
 }
 ```
 
-The `useCounter` hook returns a tuple again.
+The `useCounter` hook returns the selected slice of the current state.
 
-The first element here is the current state.
-
-Here, we do not pass any argument to the hook because we want the state as is from the store. The hooks accepts two arguments -
+Here, we do not pass any argument to the hook because we want the state as is from the store. But, the hook accepts two arguments -
 
 - `selector` - _[optional]_ It accepts a callback function that gets passed the entire current state from the store and can return a partial slice of the state or derived state for the component to use. Use this to only subscribe to the state your component needs preventing unnecessary renders. By default, the entire state is returned.
 - `equalityCheck` - _[optional]_ It accepts a callback function that gets passed the previous state slice (return value of the `selector`)
@@ -54,7 +52,7 @@ Here, we do not pass any argument to the hook because we want the state as is fr
 const squaredSelector = (count) => count ** count;
 
 function SquaredCounter() {
-  const [countSquare] = useCounter(squaredSelector);
+  const countSquare = useCounter(squaredSelector);
 
   return <span>{countSquare}</span>;
 }
@@ -68,7 +66,7 @@ Here, we are passing a selector callback function that gives us the square of th
 const absoluteValueCheck = (prev, next) => Math.abs(prev) === Math.abs(next);
 
 function AbsoluteSquaredCounter() {
-  const [countSquare] = useCounter(squareSelector, absoluteValueCheck);
+  const countSquare = useCounter(squareSelector, absoluteValueCheck);
 
   return <span>{countSquare}</span>;
 }
@@ -84,18 +82,18 @@ Here, we are passing a custom equality check function to check if the absolute v
 import { createStore } from '@halka/state';
 
 const initialCount = 0;
-const [useCounter, globalUpdateCounter] = createStore(initialCount);
+const [useCounter, updateCounter] = createStore(initialCount);
 
 const reset = () => {
-  globalUpdateCounter(intialCount);
+  updateCounter(intialCount);
 };
 
 const increment = () => {
-  globalUpdateCounter((prevCount) => prevCount + 1);
+  updateCounter((prevCount) => prevCount + 1);
 };
 
 function Counter() {
-  const [count, updateCounter] = useCounter();
+  const count = useCounter();
 
   const decrement = () => {
     updateCounter((prevCount) => prevCount - 1);
@@ -105,11 +103,11 @@ function Counter() {
 }
 ```
 
-State updater function is the second element of both the return value of `createStore` as well as `useCounter` (i.e. the hook returned from `createStore`).
+State updater function is the second element of the tuple value returned by `createStore`.
 
 You can pass the next state value directly to the state updater method like we did in our `reset` handler.
 
-If your next state depends on the previous state than you can also pass a callback function to the state updater which gets passed the previous state and must return the next state. Like we used in our `increment` and `decrement` handler.
+But, if your next state depends on the previous state than you can also pass a callback function to the state updater which gets passed the previous state and must return the next state. Like we used in our `increment` and `decrement` handler.
 
 This API is similar to the state updater method returned by `useState`.
 
@@ -149,6 +147,28 @@ const toggleTodo = (todoIndex) => {
 ```
 
 We are using the [curried producer API from Immer](https://immerjs.github.io/immer/docs/curried-produce).
+
+To use immer in a more composable way, you can decorate the updateState itself in the following way -
+
+```js
+import { createStore } from '@halka/state';
+import produce from 'immer';
+
+// some initial state value
+import initialState from './initialState';
+
+const [useStore, updateState] = createStore(initialState);
+
+// compose the updater function with immer curried producer API
+const updateStateWithImmer = (fn) => updateState(produce(fn));
+
+// Then, the toggle todo example from above will look like this
+const toggleTodo = (todoIndex) => {
+  updateStateWithImmer((prevTodos) => {
+    prevTodos[todoIndex].completed = true;
+  });
+};
+```
 
 ## Inspirations and Prior work we referred
 
