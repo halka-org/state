@@ -6,7 +6,7 @@
   "main": "dist/halka-state.js",
   "module": "dist/halka-state.mjs",
   "unpkg": "dist/halka-state.umd.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/halka-state.d.ts",
   "amdName": "HalkaState",
   "files": [
     "dist/*",
