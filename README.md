@@ -17,16 +17,18 @@ npm install @halka/state
 ```js
 import { createStore } from '@halka/state';
 
-const [useCounter, updateCounter] = createStore(0);
+const useCounter = createStore(0);
+
+// OR
+
+const useCounter = createStore(() => 0);
 ```
 
 The library exports only one function i.e. `createStore`. You can use it to create a new store.
 
-`createStore` accepts only one argument that is the initial state of the store. It can be anything a primitive value like number, string, boolean or an array or object. It returns a tuple.
+`createStore` accepts only one argument that is the initial state of the store. It can be anything a primitive value like number, string, boolean or an array or object. It returns a tuple. It can also accept a function that returns your initialState. This can be used to lazily initial your state.
 
 The first element `useCounter` is a React hook that can be used inside any React functional component to select a slice of the current state from the store.
-
-The second element `updateCounter` is an updater function similar to the one we get from `useState`.
 
 ### Using the state hook
 
@@ -49,16 +51,16 @@ Here, we do not pass any argument to the hook because we want the state as is fr
 ### Using a state selector
 
 ```js
-const squaredSelector = (count) => count ** count;
+const cubeSelector = (count) => count ** count;
 
 function SquaredCounter() {
-  const countSquare = useCounter(squaredSelector);
+  const countCube = useCounter(cubeSelector);
 
-  return <span>{countSquare}</span>;
+  return <span>{countCube}</span>;
 }
 ```
 
-Here, we are passing a selector callback function that gives us the square of the count state. This selector is used to get a derived state here.
+Here, we are passing a selector callback function that gives us the cube of the count state. This selector is used to get a derived state here.
 
 ### Using a custom equality check
 
@@ -66,15 +68,13 @@ Here, we are passing a selector callback function that gives us the square of th
 const absoluteValueCheck = (prev, next) => Math.abs(prev) === Math.abs(next);
 
 function AbsoluteSquaredCounter() {
-  const countSquare = useCounter(squareSelector, absoluteValueCheck);
+  const countCube = useCounter(cubeSelector, absoluteValueCheck);
 
-  return <span>{countSquare}</span>;
+  return <span>{countCube}</span>;
 }
 ```
 
 Here, we are passing a custom equality check function to check if the absolute value is the same as before. If yes, then we don't update it.
-
-> (PS: It's redundant here because square of any number is always positive. The example is just for demonstration purposes)
 
 ### Updating state
 
@@ -82,47 +82,47 @@ Here, we are passing a custom equality check function to check if the absolute v
 import { createStore } from '@halka/state';
 
 const initialCount = 0;
-const [useCounter, updateCounter] = createStore(initialCount);
+const useCounter = createStore(initialCount);
 
 const reset = () => {
-  updateCounter(intialCount);
+  useCounter.set(intialCount);
 };
 
 const increment = () => {
-  updateCounter((prevCount) => prevCount + 1);
+  useCounter.set((prevCount) => prevCount + 1);
 };
 
 function Counter() {
   const count = useCounter();
 
   const decrement = () => {
-    updateCounter((prevCount) => prevCount - 1);
+    useCounter.set((prevCount) => prevCount - 1);
   };
 
   return <span>{count}</span>;
 }
 ```
 
-State updater function is the second element of the tuple value returned by `createStore`.
+State updater function `set` is accessible on the hook as a property itself.
 
-You can pass the next state value directly to the state updater method like we did in our `reset` handler.
+You can pass the next state value directly to the function like we did in our `reset` handler.
 
 But, if your next state depends on the previous state than you can also pass a callback function to the state updater which gets passed the previous state and must return the next state. Like we used in our `increment` and `decrement` handler.
 
-This API is similar to the state updater method returned by `useState`.
+This API is similar to state update function returned by `useState`.
 
 ### Updating nested state with Immer
 
-Since, we can't mutate the state directly updating nested properties in objects and arrays become a hassle. For example -
+The re-render triggers are based on shallow referential equality checks. So, we shouldn't mutate the state directly updating nested properties in objects and arrays become a hassle. For example -
 
 ```js
 const markTodoComplete = (todoIndex) => {
   // we need to use map so that we create a new array
-  // to trigger a state update (we can't directly mutate it)
+  // to trigger a state update (we shouldn't directly mutate it)
   // APIs like slice, map, filter, reduce return new arrays
 
   // iterate over all the todos, keep all the todos same except the one we are trying to mark as complete
-  updateTodos((prevTodos) =>
+  useTodos.set((prevTodos) =>
     prevTodos.map((todo, index) =>
       index === todoIndex ? { ...todo, completed: true } : todo
     )
@@ -138,7 +138,7 @@ Let's look at how we can use immer to make the update above simpler.
 import produce from 'immer';
 
 const toggleTodo = (todoIndex) => {
-  updateTodos(
+  useTodos.set(
     produce((prevTodos) => {
       prevTodos[todoIndex].completed = true;
     })
@@ -157,10 +157,10 @@ import produce from 'immer';
 // some initial state value
 import initialState from './initialState';
 
-const [useStore, updateState] = createStore(initialState);
+const useStore = createStore(initialState);
 
 // compose the updater function with immer curried producer API
-const updateStateWithImmer = (fn) => updateState(produce(fn));
+const updateStateWithImmer = (fn) => useStore.set(produce(fn));
 
 // Then, the toggle todo example from above will look like this
 const toggleTodo = (todoIndex) => {
@@ -169,6 +169,20 @@ const toggleTodo = (todoIndex) => {
   });
 };
 ```
+
+### Accessing state outside of React
+
+You can access the state outside of react or without using the hook returned by `createStore` as well.
+
+State getter function `get` is accessible on the hook as a property itself just like `set`.
+
+```js
+const useStore = createStore(initialState);
+
+const state = useStore.get();
+```
+
+You can use it even inside a `useEffect` to manually trigger updates and much more.
 
 ## Inspirations and Prior work we referred
 

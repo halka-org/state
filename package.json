@@ -8,6 +8,13 @@
   "unpkg": "dist/halka-state.umd.js",
   "types": "dist/index.d.ts",
   "amdName": "HalkaState",
+  "files": [
+    "dist/*",
+    "src/*",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ],
   "sideEffects": false,
   "scripts": {
     "example": "parcel example/index.html --out-dir example/dist",

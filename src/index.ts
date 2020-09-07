@@ -55,26 +55,33 @@ interface Listener<State> {
 }
 type Listeners<State> = Record<UniqueSymbol, Listener<State>>;
 type StateUpdaterCallback<State> = (prevState: State) => State;
-type StateUpdater<State> = (arg: StateUpdaterCallback<State> | State) => void;
-type UseState<State> = (
-  selector?: Selector<State>,
-  equalityCheck?: EqualityCheck<State>
-) => Partial<State>;
+type SetState<State> = (arg: StateUpdaterCallback<State> | State) => void;
 type GetState<State> = () => State;
 
 type StateTypes =
   | Record<string | number | symbol, unknown>
   | string
   | number
-  | boolean;
+  | boolean
+  | undefined
+  | null;
+
+interface UseStore<State extends StateTypes | Array<StateTypes>> {
+  (selector?: Selector<State>, equalityCheck?: EqualityCheck<State>): Partial<
+    State
+  >;
+  set: SetState<State>;
+  get: GetState<State>;
+}
+
 export function createStore<State extends StateTypes | Array<StateTypes>>(
-  initialState: State
-): [UseState<State>, StateUpdater<State>, GetState<State>] {
+  initialState: State | (() => State)
+): UseStore<State> {
   const listenerKeys = new Set<UniqueSymbol>();
   let listeners: Listeners<State> = {} as Listeners<State>;
 
   const store = {
-    state: initialState,
+    state: typeof initialState === 'function' ? initialState() : initialState,
     getState(): State {
       return this.state;
     },
@@ -149,5 +156,8 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
     return selector(state);
   };
 
-  return [useStore, updater, store.getState];
+  useStore.set = updater;
+  useStore.get = store.getState.bind(store);
+
+  return useStore;
 }
