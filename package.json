@@ -1,6 +1,6 @@
 {
   "name": "@halka/state",
-  "version": "1.0.0-0",
+  "version": "1.0.0-1",
   "description": "A lightweight global state solution for react with zero external dependencies and clean hooks API",
   "source": "src/index.ts",
   "main": "dist/halka-state.js",
