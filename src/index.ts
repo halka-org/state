@@ -42,21 +42,26 @@ function useForceUpdate() {
 const uniqueSymbol: unique symbol = Symbol('_');
 type UniqueSymbol = typeof uniqueSymbol;
 
-type Selector<State> = (state: State) => Partial<State>;
-type EqualityCheck<State> = (
-  prevSlice: Partial<State>,
-  nextSlice: Partial<State>
+export type Selector<State, StateSlice> = (state: State) => StateSlice;
+export type EqualityCheck<StateSlice> = (
+  prevSlice: StateSlice,
+  nextSlice: StateSlice
 ) => boolean;
-interface Listener<State> {
+interface Listener<State, StateSlice> {
   triggerUpdate: ReturnType<typeof useForceUpdate>;
-  prevSlice: Partial<State>;
-  selector: Selector<State>;
-  equalityCheck: EqualityCheck<State>;
+  prevSlice: StateSlice;
+  selector: Selector<State, StateSlice>;
+  equalityCheck: EqualityCheck<StateSlice>;
 }
-type Listeners<State> = Record<UniqueSymbol, Listener<State>>;
-type StateUpdaterCallback<State> = (prevState: State) => State;
-type SetState<State> = (arg: StateUpdaterCallback<State> | State) => void;
-type GetState<State> = () => State;
+type Listeners<State, StateSlice> = Record<
+  UniqueSymbol,
+  Listener<State, StateSlice>
+>;
+export type StateUpdaterCallback<State> = (prevState: State) => State;
+export type SetState<State> = (
+  arg: StateUpdaterCallback<State> | State
+) => void;
+export type GetState<State> = () => State;
 
 type StateTypes =
   | Record<string | number | symbol, unknown>
@@ -67,9 +72,14 @@ type StateTypes =
   | null;
 
 interface UseStore<State extends StateTypes | Array<StateTypes>> {
-  (selector?: Selector<State>, equalityCheck?: EqualityCheck<State>): Partial<
-    State
-  >;
+  (
+    selector?: Selector<State, State>,
+    equalityCheck?: EqualityCheck<State>
+  ): State;
+  <StateSlice>(
+    selector?: Selector<State, StateSlice>,
+    equalityCheck?: EqualityCheck<StateSlice>
+  ): StateSlice;
   set: SetState<State>;
   get: GetState<State>;
 }
@@ -78,7 +88,7 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
   initialState: State | (() => State)
 ): UseStore<State> {
   const listenerKeys = new Set<UniqueSymbol>();
-  let listeners: Listeners<State> = {} as Listeners<State>;
+  let listeners: Listeners<State, unknown> = {} as Listeners<State, unknown>;
 
   const store = {
     state: typeof initialState === 'function' ? initialState() : initialState,
@@ -108,14 +118,14 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
     });
   }
 
-  const defaultSelector: Selector<State> = (state) => state;
+  const defaultSelector: Selector<State, State> = (state) => state;
   const defaultEqualityCheck: EqualityCheck<State> = (prevSlice, nextSlice) =>
     prevSlice === nextSlice;
 
   const useStore = (
-    selector: Selector<State> = defaultSelector,
-    equalityCheck: EqualityCheck<State> = defaultEqualityCheck
-  ): Partial<State> => {
+    selector = defaultSelector,
+    equalityCheck = defaultEqualityCheck
+  ) => {
     const state = store.getState();
     const currentSlice = selector(state);
 
@@ -166,7 +176,7 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
   };
 
   useStore.set = updater;
-  useStore.get = store.getState.bind(store);
+  useStore.get = store.getState.bind(store) as GetState<State>;
 
   return useStore;
 }
