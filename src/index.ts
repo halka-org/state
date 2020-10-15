@@ -117,6 +117,7 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
     equalityCheck: EqualityCheck<State> = defaultEqualityCheck
   ): Partial<State> => {
     const state = store.getState();
+    const currentSlice = selector(state);
 
     const listenerKeyRef = React.useRef(Symbol('listener'));
 
@@ -127,10 +128,14 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
       listenerKeys.add(listenerKey as UniqueSymbol);
       listeners[listenerKey] = {
         triggerUpdate,
-        prevSlice: selector(state),
+        prevSlice: currentSlice,
         selector,
         equalityCheck,
       };
+
+      if (!equalityCheck(currentSlice, selector(store.getState()))) {
+        triggerUpdate();
+      }
 
       return () => {
         listenerKeys.delete(listenerKey as UniqueSymbol);
@@ -146,14 +151,18 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
     useUpdateOnlyEffect(() => {
       const listenerKey = listenerKeyRef.current;
       listeners[listenerKey].equalityCheck = equalityCheck;
+
+      if (!equalityCheck(currentSlice, selector(store.getState()))) {
+        triggerUpdate();
+      }
     }, [equalityCheck]);
 
     useUpdateOnlyEffect(() => {
       const listenerKey = listenerKeyRef.current;
-      listeners[listenerKey].prevSlice = selector(state);
+      listeners[listenerKey].prevSlice = currentSlice;
     });
 
-    return selector(state);
+    return currentSlice;
   };
 
   useStore.set = updater;
