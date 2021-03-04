@@ -1,4 +1,4 @@
-import React, { EffectCallback, DependencyList, useState } from 'react';
+import React, { EffectCallback, DependencyList } from 'react';
 
 function useMountEffect(effect: EffectCallback) {
   React.useEffect(effect, []);
@@ -29,14 +29,6 @@ function useUpdateOnlyEffect(
   }, dependencies);
 }
 
-function useForceUpdate() {
-  const triggerUpdate = React.useState({})[1];
-
-  return React.useCallback(() => {
-    triggerUpdate({});
-  }, []);
-}
-
 // typescript has issues with unique symbol type for Set and Record
 // this is a work around
 const uniqueSymbol: unique symbol = Symbol('_');
@@ -48,7 +40,7 @@ export type EqualityCheck<StateSlice> = (
   nextSlice: StateSlice
 ) => boolean;
 interface Listener<State, StateSlice> {
-  triggerUpdate: ReturnType<typeof useForceUpdate>;
+  triggerUpdate: React.Dispatch<React.SetStateAction<State>>;
   prevSlice: StateSlice;
   selector: Selector<State, StateSlice>;
   equalityCheck: EqualityCheck<StateSlice>;
@@ -110,10 +102,10 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
     listenerKeys.forEach((key: UniqueSymbol) => {
       const listener = listeners[key];
 
-      const nextSlice = listener.selector(store.state);
+      const nextSlice = listener.selector(store.state) as State;
 
       if (!listener.equalityCheck(listener.prevSlice, nextSlice)) {
-        listener.triggerUpdate();
+        listener.triggerUpdate(nextSlice);
       }
     });
   }
@@ -127,14 +119,11 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
     equalityCheck = defaultEqualityCheck
   ) => {
     const state = store.getState();
-    const [stateSlice, setStateSlice] = useState(() => selector(state));
-    // const currentSlice = selector(state);
+    const [stateSlice, setStateSlice] = React.useState(() => selector(state));
     const currentSliceRef = React.useRef(stateSlice);
     currentSliceRef.current = stateSlice;
 
     const listenerKeyRef = React.useRef(Symbol('listener'));
-
-    // const triggerUpdate = useForceUpdate();
 
     useMountEffect(() => {
       const listenerKey = listenerKeyRef.current;
