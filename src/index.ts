@@ -1,4 +1,4 @@
-import React, { EffectCallback, DependencyList } from 'react';
+import React, { EffectCallback, DependencyList, useState } from 'react';
 
 function useMountEffect(effect: EffectCallback) {
   React.useEffect(effect, []);
@@ -127,24 +127,31 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
     equalityCheck = defaultEqualityCheck
   ) => {
     const state = store.getState();
-    const currentSlice = selector(state);
+    const [stateSlice, setStateSlice] = useState(() => selector(state));
+    // const currentSlice = selector(state);
+    const currentSliceRef = React.useRef(stateSlice);
+    currentSliceRef.current = stateSlice;
 
     const listenerKeyRef = React.useRef(Symbol('listener'));
 
-    const triggerUpdate = useForceUpdate();
+    // const triggerUpdate = useForceUpdate();
 
     useMountEffect(() => {
       const listenerKey = listenerKeyRef.current;
       listenerKeys.add(listenerKey as UniqueSymbol);
+
+      const currentSlice = currentSliceRef.current;
+      const nextSlice = selector(store.getState());
+
       listeners[listenerKey] = {
-        triggerUpdate,
+        triggerUpdate: setStateSlice,
         prevSlice: currentSlice,
         selector,
         equalityCheck,
       };
 
-      if (!equalityCheck(currentSlice, selector(store.getState()))) {
-        triggerUpdate();
+      if (!equalityCheck(currentSlice, nextSlice)) {
+        setStateSlice(nextSlice);
       }
 
       return () => {
@@ -162,17 +169,19 @@ export function createStore<State extends StateTypes | Array<StateTypes>>(
       const listenerKey = listenerKeyRef.current;
       listeners[listenerKey].equalityCheck = equalityCheck;
 
+      const currentSlice = currentSliceRef.current;
+      const newSlice = selector(store.getState());
       if (!equalityCheck(currentSlice, selector(store.getState()))) {
-        triggerUpdate();
+        setStateSlice(newSlice);
       }
     }, [equalityCheck]);
 
     useUpdateOnlyEffect(() => {
       const listenerKey = listenerKeyRef.current;
-      listeners[listenerKey].prevSlice = currentSlice;
+      listeners[listenerKey].prevSlice = currentSliceRef.current;
     });
 
-    return currentSlice;
+    return stateSlice;
   };
 
   useStore.set = updater;
